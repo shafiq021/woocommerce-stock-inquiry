@@ -1,0 +1,239 @@
+/* ===========================
+   CUSTOM TOGGLE CHECKBOXES
+=========================== */
+.wsi-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 1rem;
+	user-select: none;
+	vertical-align: middle;
+}
+.wsi-toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.wsi-checkmark {
+	--clr: #008743;
+	position: relative;
+	height: 1.3em;
+	width: 1.3em;
+	background-color: #ccc;
+	border-radius: 50%;
+	transition: background-color 300ms, border-radius 300ms;
+	flex-shrink: 0;
+}
+.wsi-toggle input:checked ~ .wsi-checkmark {
+	background-color: var(--clr);
+	border-radius: .4em;
+	animation: wsiPulse 500ms ease-in-out;
+}
+.wsi-checkmark::after {
+	content: "";
+	position: absolute;
+	display: none;
+	left: 0.45em;
+	top: 0.25em;
+	width: 0.25em;
+	height: 0.5em;
+	border: solid #fff;
+	border-width: 0 0.15em 0.15em 0;
+	transform: rotate(45deg);
+}
+.wsi-toggle input:checked ~ .wsi-checkmark::after {
+	display: block;
+}
+@keyframes wsiPulse {
+	0%   { box-shadow: 0 0 0 #0B6E4F90; rotate: 20deg; }
+	50%  { rotate: -20deg; }
+	75%  { box-shadow: 0 0 0 10px #0B6E4F60; }
+	100% { box-shadow: 0 0 0 13px #0B6E4F30; rotate: 0; }
+}
+
+/* ===========================
+   GENERAL ADMIN
+=========================== */
+.wsi-wrap .wsi-note { margin: 12px 0; }
+.wsi-wrap .wsi-radio { display: inline-block; margin: 0 20px 6px 0; }
+.wsi-wrap .wsi-disabled { opacity: .6; }
+.wsi-wrap .wsi-badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border-radius: 10px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+.wsi-wrap .wsi-method-fields h2 { margin-top: 24px; }
+.wsi-wrap .wsi-padding label { display: inline-block; margin-right: 12px; }
+.wsi-wrap .wsi-padding label span { display: block; font-size: 12px; color: #646970; }
+
+/* ===========================
+   MAIN FLEX LAYOUT
+=========================== */
+.wsi-main-layout {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0;
+	align-items: flex-start;
+	margin-top: 16px;
+}
+.wsi-settings-column {
+	flex: 1 1 0;
+	min-width: 0;
+	border-right: 1px solid #c3c4c7;
+	padding-right: 24px;
+}
+.wsi-settings-column .nav-tab-wrapper {
+	margin-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
+}
+.wsi-tab-contents {
+	padding-top: 20px;
+}
+.wsi-preview-column {
+	flex: 0 0 320px;
+	padding-left: 24px;
+	position: sticky;
+	top: 32px;
+	align-self: flex-start;
+}
+@media (max-width: 1100px) {
+	.wsi-main-layout { flex-wrap: wrap; }
+	.wsi-settings-column { border-right: none; padding-right: 0; flex: 1 1 100%; }
+	.wsi-preview-column { flex: 1 1 100%; padding-left: 0; position: static; border-top: 1px solid #c3c4c7; padding-top: 20px; margin-top: 20px; }
+}
+
+/* ===========================
+   LIVE PREVIEW CARD
+=========================== */
+.wsi-preview-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 16px;
+	margin-bottom: 12px;
+}
+.wsi-preview-card > strong {
+	display: block;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: .5px;
+	color: #646970;
+	margin-bottom: 10px;
+}
+.wsi-preview-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-height: 80px;
+	margin: 0 0 8px;
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	padding: 15px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* ===========================
+   WHATSAPP PHONE MOCKUP
+=========================== */
+.wsi-wa-phone-mockup {
+	display: inline-block;
+	width: 240px;
+	border-radius: 20px;
+	background: #e5ddd5;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 1.5px 4px rgba(0,0,0,0.12);
+	overflow: hidden;
+	border: 3px solid #aaa;
+	margin-top: 8px;
+}
+.wsi-wa-phone-screen {
+	display: flex;
+	flex-direction: column;
+	min-height: 320px;
+}
+.wsi-wa-phone-header {
+	background: #075e54;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+}
+.wsi-wa-phone-avatar {
+	width: 32px;
+	height: 32px;
+	background: #25d366;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 15px;
+	font-weight: 700;
+	color: #fff;
+	flex-shrink: 0;
+}
+.wsi-wa-phone-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.wsi-wa-phone-status { font-size: 10px; opacity: 0.8; }
+.wsi-wa-phone-body {
+	flex: 1;
+	background-color: #e5ddd5;
+	padding: 10px 10px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.wsi-wa-phone-date {
+	text-align: center;
+	font-size: 10px;
+	color: #667781;
+	background: rgba(255,255,255,0.6);
+	border-radius: 8px;
+	padding: 2px 8px;
+	display: inline-block;
+	align-self: center;
+	margin-bottom: 4px;
+}
+.wsi-wa-msg-row {
+	display: flex;
+	justify-content: flex-end;
+}
+.wsi-wa-bubble {
+	background: #d9fdd3;
+	color: #111b21;
+	padding: 6px 8px 4px;
+	border-radius: 7.5px 0 7.5px 7.5px;
+	font-family: "Segoe UI", Arial, sans-serif;
+	font-size: 12.5px;
+	line-height: 18px;
+	position: relative;
+	box-shadow: 0 1px 0.5px rgba(11,20,26,.13);
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	max-width: 180px;
+}
+.wsi-wa-bubble::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: -8px;
+	width: 0;
+	height: 0;
+	border-left: 8px solid #d9fdd3;
+	border-bottom: 10px solid transparent;
+}
+.wsi-wa-time {
+	display: block;
+	text-align: right;
+	font-size: 10px;
+	color: #667781;
+	margin-top: 2px;
+}
