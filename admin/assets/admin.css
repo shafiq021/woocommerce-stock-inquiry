@@ -9,6 +9,7 @@
 	font-size: 1rem;
 	user-select: none;
 	vertical-align: middle;
+	margin-bottom: 6px;
 }
 .wsi-toggle input {
 	position: absolute;
@@ -19,6 +20,7 @@
 .wsi-checkmark {
 	--clr: #008743;
 	position: relative;
+	display: inline-block;
 	height: 1.3em;
 	width: 1.3em;
 	background-color: #ccc;
@@ -30,6 +32,10 @@
 	background-color: var(--clr);
 	border-radius: .4em;
 	animation: wsiPulse 500ms ease-in-out;
+}
+.wsi-toggle input:focus-visible ~ .wsi-checkmark {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
 }
 .wsi-checkmark::after {
 	content: "";
@@ -73,9 +79,12 @@
 .wsi-wrap .wsi-method-fields h2 { margin-top: 24px; }
 .wsi-wrap .wsi-padding label { display: inline-block; margin-right: 12px; }
 .wsi-wrap .wsi-padding label span { display: block; font-size: 12px; color: #646970; }
+.wsi-wrap .wsi-section-title { margin: 0 0 4px; font-size: 16px; }
+.wsi-wrap .wsi-section-intro { margin: 0 0 8px; color: #646970; }
 
 /* ===========================
    MAIN FLEX LAYOUT
+   Controls left, sticky preview right.
 =========================== */
 .wsi-main-layout {
 	display: flex;
@@ -98,16 +107,28 @@
 	padding-top: 20px;
 }
 .wsi-preview-column {
-	flex: 0 0 320px;
+	flex: 0 0 340px;
+	max-width: 340px;
 	padding-left: 24px;
 	position: sticky;
-	top: 32px;
+	top: 42px; /* Below the admin bar. */
 	align-self: flex-start;
 }
+@media (max-width: 782px) {
+	.wsi-preview-column { top: 56px; }
+}
+/* Narrow screens: preview stacks above the controls so it is never lost at the bottom. */
 @media (max-width: 1100px) {
 	.wsi-main-layout { flex-wrap: wrap; }
-	.wsi-settings-column { border-right: none; padding-right: 0; flex: 1 1 100%; }
-	.wsi-preview-column { flex: 1 1 100%; padding-left: 0; position: static; border-top: 1px solid #c3c4c7; padding-top: 20px; margin-top: 20px; }
+	.wsi-settings-column { border-right: none; padding-right: 0; flex: 1 1 100%; order: 2; }
+	.wsi-preview-column {
+		flex: 1 1 100%;
+		max-width: none;
+		padding-left: 0;
+		position: static;
+		order: 1;
+		margin-bottom: 20px;
+	}
 }
 
 /* ===========================
@@ -128,112 +149,95 @@
 	color: #646970;
 	margin-bottom: 10px;
 }
-.wsi-preview-stage {
+.wsi-preview-ctx {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+.wsi-preview-ctx .button.is-active {
+	background: #2271b1;
+	border-color: #2271b1;
+	color: #fff;
+}
+.wsi-preview-stage {
 	min-height: 80px;
 	margin: 0 0 8px;
-	background: #f6f7f7;
+	background: #fff;
 	border: 1px dashed #c3c4c7;
 	border-radius: 4px;
-	padding: 15px;
+	padding: 4px 15px;
 	width: 100%;
 	box-sizing: border-box;
+	overflow: hidden;
 }
 
 /* ===========================
-   WHATSAPP PHONE MOCKUP
+   WHATSAPP CHAT BUBBLES
+   Gray incoming + green outgoing bubble with tails.
+   The tail "cut-out" uses the demo background, so keep both white.
 =========================== */
-.wsi-wa-phone-mockup {
-	display: inline-block;
-	width: 240px;
-	border-radius: 20px;
-	background: #e5ddd5;
-	box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 1.5px 4px rgba(0,0,0,0.12);
-	overflow: hidden;
-	border: 3px solid #aaa;
-	margin-top: 8px;
-}
-.wsi-wa-phone-screen {
+.wsi-bubble-demo {
 	display: flex;
 	flex-direction: column;
-	min-height: 320px;
+	gap: 14px;
+	max-width: 420px;
+	padding: 18px 22px 18px 18px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	box-sizing: border-box;
 }
-.wsi-wa-phone-header {
-	background: #075e54;
-	color: #fff;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 8px 12px;
-}
-.wsi-wa-phone-avatar {
-	width: 32px;
-	height: 32px;
-	background: #25d366;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 15px;
-	font-weight: 700;
-	color: #fff;
-	flex-shrink: 0;
-}
-.wsi-wa-phone-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
-.wsi-wa-phone-status { font-size: 10px; opacity: 0.8; }
-.wsi-wa-phone-body {
-	flex: 1;
-	background-color: #e5ddd5;
-	padding: 10px 10px 16px;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-.wsi-wa-phone-date {
-	text-align: center;
-	font-size: 10px;
-	color: #667781;
-	background: rgba(255,255,255,0.6);
-	border-radius: 8px;
-	padding: 2px 8px;
-	display: inline-block;
-	align-self: center;
-	margin-bottom: 4px;
-}
-.wsi-wa-msg-row {
-	display: flex;
-	justify-content: flex-end;
-}
-.wsi-wa-bubble {
-	background: #d9fdd3;
-	color: #111b21;
-	padding: 6px 8px 4px;
-	border-radius: 7.5px 0 7.5px 7.5px;
-	font-family: "Segoe UI", Arial, sans-serif;
-	font-size: 12.5px;
-	line-height: 18px;
+.wsi-bubble {
 	position: relative;
-	box-shadow: 0 1px 0.5px rgba(11,20,26,.13);
+	max-width: 82%;
+	padding: 10px 16px;
+	border-radius: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.4;
 	white-space: pre-wrap;
-	word-wrap: break-word;
-	max-width: 180px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	box-sizing: border-box;
 }
-.wsi-wa-bubble::after {
+.wsi-bubble::before,
+.wsi-bubble::after {
 	content: "";
 	position: absolute;
-	top: 0;
-	right: -8px;
-	width: 0;
-	height: 0;
-	border-left: 8px solid #d9fdd3;
-	border-bottom: 10px solid transparent;
+	bottom: 0;
+	height: 20px;
 }
-.wsi-wa-time {
-	display: block;
-	text-align: right;
-	font-size: 10px;
-	color: #667781;
-	margin-top: 2px;
+.wsi-bubble--in {
+	align-self: flex-start;
+	background: #e5e7ea;
+	color: #1c1c1e;
+}
+.wsi-bubble--in::before {
+	left: -8px;
+	width: 20px;
+	background: #e5e7ea;
+	border-bottom-right-radius: 15px;
+}
+.wsi-bubble--in::after {
+	left: -10px;
+	width: 10px;
+	background: #fff;
+	border-bottom-right-radius: 10px;
+}
+.wsi-bubble--out {
+	align-self: flex-end;
+	background: #00cf48;
+	color: #fff;
+}
+.wsi-bubble--out::before {
+	right: -8px;
+	width: 20px;
+	background: #00cf48;
+	border-bottom-left-radius: 15px;
+}
+.wsi-bubble--out::after {
+	right: -10px;
+	width: 10px;
+	background: #fff;
+	border-bottom-left-radius: 10px;
 }

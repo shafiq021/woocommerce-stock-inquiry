@@ -1,12 +1,15 @@
 <?php
 /**
- * Renders the Send Inquiry button and swaps it in for Add to Cart.
+ * Renders the inquiry section (heading, button, description, branding) and swaps it in for Add to Cart.
  *
  * Integration points (all standard WooCommerce hooks, no JavaScript):
  *  - `woocommerce_loop_add_to_cart_link`  shop, category, search, related, upsells, cross-sells,
  *                                         and Elementor product widgets that use the loop template.
  *  - `wc_get_template`                    single product add-to-cart templates (simple + variable),
  *                                         which also covers Elementor's single-product widgets.
+ *
+ * Heading, description and branding each have their own "show on single / show on listings" switch,
+ * so the full section can appear on the product page while listings only get the button.
  *
  * @package WooCommerce_Stock_Inquiry
  */
@@ -56,7 +59,7 @@ class WSI_Button {
 			return $html;
 		}
 
-		$button = $this->get_button( $product );
+		$button = $this->get_button( $product, 'loop' );
 		if ( '' === $button ) {
 			return $html;
 		}
@@ -88,14 +91,14 @@ class WSI_Button {
 		}
 
 		global $product;
-		$button = $this->get_button( $product );
+		$button = $this->get_button( $product, 'single' );
 		if ( '' === $button ) {
 			return $template;
 		}
 
 		self::$pending = array(
-			'button'   => $button,
-			'original' => $template,
+			'button'    => $button,
+			'original'  => $template,
 			'is_simple' => 'single-product/add-to-cart/simple.php' === $template_name,
 		);
 
@@ -115,9 +118,10 @@ class WSI_Button {
 
 	/**
 	 * @param WC_Product|null $product Product.
-	 * @return string Escaped button HTML, or '' when WooCommerce should render normally.
+	 * @param string          $context 'single' or 'loop'.
+	 * @return string Escaped HTML, or '' when WooCommerce should render normally.
 	 */
-	private function get_button( $product ) {
+	private function get_button( $product, $context ) {
 		if ( ! $product instanceof WC_Product || ! WSI_Stock_Checker::needs_inquiry( $product ) ) {
 			return '';
 		}
@@ -132,22 +136,35 @@ class WSI_Button {
 			return '';
 		}
 
-		return self::render( $product, $link );
+		return self::render( $product, $link, $context );
+	}
+
+	/**
+	 * Whether an extra element (heading, desc, branding) is shown in a context.
+	 *
+	 * @param string $element 'heading', 'desc' or 'branding'.
+	 * @param string $context 'single' or 'loop'.
+	 * @return bool
+	 */
+	private static function shows( $element, $context ) {
+		if ( 'branding' !== $element && ! WSI_Settings::get( 'enable_' . $element ) ) {
+			return false;
+		}
+		$suffix = ( 'single' === $context ) ? 'single' : 'loops';
+		return (bool) WSI_Settings::get( $element . '_show_' . $suffix );
 	}
 
 	/**
 	 * @param WC_Product $product Product.
 	 * @param array      $link    array( 'url' => ..., 'target' => ... ).
+	 * @param string     $context 'single' or 'loop'.
 	 * @return string
 	 */
-	public static function render( $product, $link ) {
+	public static function render( $product, $link, $context = 'single' ) {
 		$method_id = WSI_Settings::get( 'method' );
-		if ( 'whatsapp' === $method_id ) {
-			$text = (string) WSI_Settings::get( 'button_text_whatsapp' );
-		} else {
-			$text = (string) WSI_Settings::get( 'button_text_contact' );
-		}
-		
+		$is_wa     = ( 'whatsapp' === $method_id );
+		$text      = (string) WSI_Settings::get( $is_wa ? 'button_text_whatsapp' : 'button_text_contact' );
+
 		$name  = wp_strip_all_tags( $product->get_name() );
 		$extra = '';
 
@@ -158,9 +175,8 @@ class WSI_Button {
 		/* translators: 1: button text, 2: product name */
 		$label = sprintf( __( '%1$s: %2$s', 'woocommerce-stock-inquiry' ), $text, $name );
 
-		// WordPress esc_url() aggressively strips %0A and %0D (newlines) for security.
-		// WhatsApp wa.me links rely on %0A for line breaks, so we temporarily replace
-		// them to survive esc_url() and restore them afterward.
+		// esc_url() strips %0A and %0D (newlines). WhatsApp wa.me links rely on them for line breaks,
+		// so they are swapped for placeholders that survive esc_url() and restored afterwards.
 		$safe_url = str_replace(
 			array( '__WSI_0A__', '__WSI_0D__' ),
 			array( '%0A', '%0D' ),
@@ -175,12 +191,8 @@ class WSI_Button {
 			esc_html( $text )
 		);
 
-		$uid = 'wsi-' . uniqid();
-		$wrapper_start = '<div id="' . esc_attr( $uid ) . '" class="wsi-inquiry-container" style="margin-top: 15px; margin-bottom: 15px;">';
-		$wrapper_end   = '</div>';
-
 		$heading = '';
-		if ( WSI_Settings::get( 'enable_heading' ) ) {
+		if ( self::shows( 'heading', $context ) ) {
 			$heading_text = (string) WSI_Settings::get( 'heading_text' );
 			if ( '' !== $heading_text ) {
 				$heading = '<div class="wsi-inquiry-heading">' . esc_html( $heading_text ) . '</div>';
@@ -188,107 +200,71 @@ class WSI_Button {
 		}
 
 		$desc = '';
-		if ( WSI_Settings::get( 'enable_desc' ) ) {
-			$method_id = WSI_Settings::get( 'method' );
-			if ( 'whatsapp' === $method_id ) {
-				$desc_text = (string) WSI_Settings::get( 'desc_text_whatsapp' );
-			} else {
-				$desc_text = (string) WSI_Settings::get( 'desc_text_contact' );
-			}
+		if ( self::shows( 'desc', $context ) ) {
+			$desc_text = (string) WSI_Settings::get( $is_wa ? 'desc_text_whatsapp' : 'desc_text_contact' );
 			if ( '' !== $desc_text ) {
 				$desc = '<div class="wsi-inquiry-desc">' . wp_kses_post( wpautop( $desc_text ) ) . '</div>';
 			}
 		}
 
-		$html = $wrapper_start . $heading . $button_html . $desc . $wrapper_end;
+		$branding = '';
+		if ( self::shows( 'branding', $context ) ) {
+			$branding = '<div class="wsi-branding-sk">Powered By SK</div>';
+		}
 
-		$script = '<script>
-			(function(){
-				var container = document.getElementById("' . esc_attr( $uid ) . '");
-				if (!container) return;
-				
-				var addBranding = function() {
-					var old = container.querySelector(".wsi-branding-sk");
-					if (old) old.remove();
-					var b = document.createElement("div");
-					b.className = "wsi-branding-sk";
-					b.innerHTML = "Powered By SK";
-					b.style.cssText = "display: block !important; visibility: visible !important; opacity: 0.7 !important; font-family: \'Poppins\', sans-serif !important; font-size: 0.8125em !important; color: #999999 !important; margin-top: 10px !important; line-height: 1.5 !important; position: static !important; transform: none !important; clip-path: none !important; max-height: none !important; max-width: none !important; width: auto !important; height: auto !important; overflow: visible !important;";
-					container.appendChild(b);
-					return b;
-				};
-				
-				var branding = addBranding();
-				
-				setInterval(function(){
-					if (!branding || !document.body.contains(branding)) {
-						branding = addBranding();
-					} else {
-						var style = window.getComputedStyle(branding);
-						if (style.display === "none" || style.visibility === "hidden" || parseFloat(style.opacity) < 0.1 || style.fontSize === "0px" || style.position === "absolute" || style.position === "fixed") {
-							branding.style.setProperty("display", "block", "important");
-							branding.style.setProperty("visibility", "visible", "important");
-							branding.style.setProperty("opacity", "0.7", "important");
-							branding.style.setProperty("font-size", "0.8125em", "important");
-							branding.style.setProperty("position", "static", "important");
-						}
-					}
-				}, 2000);
-			})();
-		</script>';
+		// Order: heading -> button -> description -> branding.
+		$html = '<div class="wsi-inquiry-container">' . $heading . $button_html . $desc . $branding . '</div>';
 
-		$html .= $script;
-
-		return (string) apply_filters( 'wsi_button_html', $html, $product, $link );
+		return (string) apply_filters( 'wsi_button_html', $html, $product, $link, $context );
 	}
 
 	/**
-	 * Button CSS from the settings. Mirrored in admin/assets/admin.js for the live preview;
+	 * Section CSS from the settings. Mirrored in admin/assets/admin.js for the live preview;
 	 * change both together.
 	 *
 	 * @param array  $s        Settings.
-	 * @param string $selector CSS selector.
+	 * @param string $selector Button CSS selector.
 	 * @return string
 	 */
 	public static function build_css( $s, $selector ) {
-		$css = sprintf(
-			'%1$s{box-sizing:border-box;min-height:0;font-size:%2$dpx;font-weight:%3$d;line-height:1.4;text-align:center;text-decoration:none;text-shadow:none;box-shadow:none;cursor:pointer;padding:%4$dpx %5$dpx %6$dpx %7$dpx;border-radius:%8$dpx;border-style:solid;border-width:%9$dpx;border-color:%10$s;background-color:%11$s;color:%12$s;transition:background-color .15s ease,color .15s ease,border-color .15s ease}'
-			. '%1$s:hover,%1$s:focus{background-color:%13$s;color:%14$s;border-color:%15$s;text-decoration:none}',
-			$selector,
-			(int) $s['font_size'],
-			(int) $s['font_weight'],
-			(int) $s['pad_top'],
-			(int) $s['pad_right'],
-			(int) $s['pad_bottom'],
-			(int) $s['pad_left'],
-			(int) $s['radius'],
-			(int) $s['border_width'],
-			sanitize_hex_color( $s['border_color'] ),
-			sanitize_hex_color( $s['bg'] ),
-			sanitize_hex_color( $s['color'] ),
-			sanitize_hex_color( $s['hover_bg'] ),
-			sanitize_hex_color( $s['hover_color'] ),
-			sanitize_hex_color( $s['hover_border_color'] )
-		);
+		$c   = '.wsi-inquiry-container';
+		$hex = static function ( $key ) use ( $s ) {
+			return (string) sanitize_hex_color( $s[ $key ] );
+		};
 
+		// Container + alignment.
 		$align = isset( $s['button_align'] ) ? $s['button_align'] : 'left';
 		if ( 'block' === $align ) {
-			$css .= sprintf( '.wsi-inquiry-container{display:block;width:100%%;} %1$s{display:block;width:100%%;}', $selector );
+			$css = $c . '{display:block;width:100%;margin:15px 0;}' . $selector . '{display:block;width:100%;}';
 		} else {
-			$css .= sprintf( '.wsi-inquiry-container{text-align:%1$s;} %2$s{display:inline-block;}', esc_html( $align ), $selector );
+			$css = $c . '{text-align:' . esc_html( $align ) . ';margin:15px 0;}' . $selector . '{display:inline-block;}';
 		}
 
-		if ( ! empty( $s['enable_heading'] ) ) {
-			$hsize  = isset( $s['heading_size'] ) ? (int) $s['heading_size'] : 18;
-			$hcolor = isset( $s['heading_color'] ) ? sanitize_hex_color( $s['heading_color'] ) : '#000000';
-			$css .= sprintf( '.wsi-inquiry-heading{font-size:%1$dpx;color:%2$s;margin-bottom:10px;font-weight:600;}', $hsize, $hcolor );
-		}
+		// Button.
+		$css .= $selector . '{box-sizing:border-box;min-height:0;font-family:' . WSI_Settings::font_stack( $s['btn_font_family'] )
+			. ';font-size:' . (int) $s['font_size'] . 'px;font-weight:' . (int) $s['font_weight']
+			. ';line-height:1.4;text-align:center;text-decoration:none;text-shadow:none;box-shadow:none;cursor:pointer;padding:'
+			. (int) $s['pad_top'] . 'px ' . (int) $s['pad_right'] . 'px ' . (int) $s['pad_bottom'] . 'px ' . (int) $s['pad_left']
+			. 'px;border-radius:' . (int) $s['radius'] . 'px;border-style:solid;border-width:' . (int) $s['border_width']
+			. 'px;border-color:' . $hex( 'border_color' ) . ';background-color:' . $hex( 'bg' ) . ';color:' . $hex( 'color' )
+			. ';transition:background-color .15s ease,color .15s ease,border-color .15s ease}'
+			. $selector . ':hover,' . $selector . ':focus{background-color:' . $hex( 'hover_bg' ) . ';color:' . $hex( 'hover_color' )
+			. ';border-color:' . $hex( 'hover_border_color' ) . ';text-decoration:none}';
 
-		if ( ! empty( $s['enable_desc'] ) ) {
-			$dsize  = isset( $s['desc_size'] ) ? (int) $s['desc_size'] : 14;
-			$dcolor = isset( $s['desc_color'] ) ? sanitize_hex_color( $s['desc_color'] ) : '#666666';
-			$css .= sprintf( '.wsi-inquiry-desc{font-size:%1$dpx;color:%2$s;margin-top:10px;} .wsi-inquiry-desc p{margin:0 0 10px;color:inherit;font-size:inherit;} .wsi-inquiry-desc p:last-child{margin-bottom:0;}', $dsize, $dcolor );
-		}
+		// Heading.
+		$css .= $c . ' .wsi-inquiry-heading{margin:0 0 10px;line-height:1.3;font-family:' . WSI_Settings::font_stack( $s['heading_font_family'] )
+			. ';font-size:' . (int) $s['heading_size'] . 'px;font-weight:' . (int) $s['heading_weight'] . ';color:' . $hex( 'heading_color' ) . '}';
+
+		// Description.
+		$css .= $c . ' .wsi-inquiry-desc{margin:10px 0 0;line-height:1.5;font-family:' . WSI_Settings::font_stack( $s['desc_font_family'] )
+			. ';font-size:' . (int) $s['desc_size'] . 'px;color:' . $hex( 'desc_color' ) . '}'
+			. $c . ' .wsi-inquiry-desc p{margin:0 0 10px;color:inherit;font-size:inherit;font-family:inherit}'
+			. $c . ' .wsi-inquiry-desc p:last-child{margin-bottom:0}';
+
+		// Branding: fixed muted color, only font family, size and placement are configurable.
+		$b_align = isset( $s['branding_align'] ) ? $s['branding_align'] : 'right';
+		$css    .= $c . ' .wsi-branding-sk{display:block;margin:10px 0 0;opacity:.7;color:#999;line-height:1.5;font-family:' . WSI_Settings::font_stack( $s['branding_font_family'] )
+			. ';font-size:' . (int) $s['branding_size'] . 'px;text-align:' . esc_html( $b_align ) . '}';
 
 		return $css;
 	}

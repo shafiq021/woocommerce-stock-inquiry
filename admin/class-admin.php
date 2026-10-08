@@ -92,6 +92,10 @@ class WSI_Admin {
 				'defaults' => WSI_Settings::defaults(),
 				'i18n'     => array(
 					'confirmReset' => __( 'Reset all Stock Inquiry settings to their defaults?', 'woocommerce-stock-inquiry' ),
+					/* translators: %s: product name */
+					'productLabel' => __( 'Product: %s', 'woocommerce-stock-inquiry' ),
+					/* translators: %s: product URL */
+					'urlLabel'     => __( 'Product URL: %s', 'woocommerce-stock-inquiry' ),
 				),
 			)
 		);

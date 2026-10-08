@@ -38,56 +38,103 @@ class WSI_Settings {
 	}
 
 	/**
+	 * Font families offered in the admin (value => label). Allow-list for sanitizing.
+	 * Web fonts must be loaded by the theme; the front end only sets the font-family stack.
+	 *
+	 * @return array
+	 */
+	public static function font_families() {
+		$families = array( 'inherit' => __( 'Theme default', 'woocommerce-stock-inquiry' ) );
+		foreach ( array( 'Poppins', 'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Raleway', 'Nunito', 'Playfair Display', 'Georgia', 'serif', 'sans-serif', 'monospace' ) as $name ) {
+			$families[ $name ] = $name;
+		}
+		return $families;
+	}
+
+	/**
+	 * CSS font-family value for an allow-listed font. Mirrored in admin/assets/admin.js.
+	 *
+	 * @param string $name Font name.
+	 * @return string
+	 */
+	public static function font_stack( $name ) {
+		$name = (string) $name;
+		if ( '' === $name || 'inherit' === $name ) {
+			return 'inherit';
+		}
+		if ( in_array( $name, array( 'serif', 'sans-serif', 'monospace' ), true ) ) {
+			return $name;
+		}
+		$fallback = in_array( $name, array( 'Georgia', 'Playfair Display' ), true ) ? 'serif' : 'sans-serif';
+		return "'" . str_replace( "'", '', $name ) . "', " . $fallback;
+	}
+
+	/**
 	 * @return array
 	 */
 	public static function defaults() {
 		return array(
 			// General.
-			'enabled'             => 1,
-			'enable_loops'        => 1,
-			'enable_single'       => 1,
+			'enabled'                => 1,
+			'enable_loops'           => 1,
+			'enable_single'          => 1,
 			// Inquiry method.
-			'method'              => 'contact',
-			'button_text_contact' => __( 'Send Inquiry', 'woocommerce-stock-inquiry' ),
-			'button_text_whatsapp'=> __( 'Send WhatsApp', 'woocommerce-stock-inquiry' ),
-			'contact_page'        => 0,
-			'contact_target'      => '_self',
-			'whatsapp_number'     => '',
-			'whatsapp_message'    => self::default_message(),
-			'whatsapp_auto_name'  => 1,
-			'whatsapp_auto_url'   => 1,
-			'whatsapp_target'     => '_blank',
-			// Button design.
-			'font_size'           => 14,
-			'font_weight'         => 600,
-			'pad_top'             => 12,
-			'pad_right'           => 20,
-			'pad_bottom'          => 12,
-			'pad_left'            => 20,
-			'radius'              => 4,
-			'border_width'        => 1,
-			'bg'                  => '#2271b1',
-			'color'               => '#ffffff',
-			'hover_bg'            => '#135e96',
-			'hover_color'         => '#ffffff',
-			'border_color'        => '#2271b1',
-			'hover_border_color'  => '#135e96',
-			'position'            => 'replace',
-			// Extra display elements.
-			'enable_heading'      => 0,
-			'heading_text'        => __( 'Product Inquiry', 'woocommerce-stock-inquiry' ),
-			'heading_color'       => '#000000',
-			'heading_size'        => 18,
-			'enable_desc'         => 0,
-			'desc_text_whatsapp'  => __( 'Click the button below to ask us about this product on WhatsApp.', 'woocommerce-stock-inquiry' ),
-			'desc_text_contact'   => __( 'Click the button below to send us a message about this product.', 'woocommerce-stock-inquiry' ),
-			'desc_color'          => '#666666',
-			'desc_size'           => 14,
-			'button_align'        => 'left',
+			'method'                 => 'contact',
+			'button_text_contact'    => __( 'Send Inquiry', 'woocommerce-stock-inquiry' ),
+			'button_text_whatsapp'   => __( 'Send WhatsApp', 'woocommerce-stock-inquiry' ),
+			'contact_page'           => 0,
+			'contact_target'         => '_self',
+			'whatsapp_number'        => '',
+			'whatsapp_message'       => self::default_message(),
+			'whatsapp_auto_name'     => 1,
+			'whatsapp_auto_url'      => 1,
+			'whatsapp_target'        => '_blank',
+			// Button.
+			'btn_font_family'        => 'inherit',
+			'font_size'              => 14,
+			'font_weight'            => 600,
+			'pad_top'                => 12,
+			'pad_right'              => 20,
+			'pad_bottom'             => 12,
+			'pad_left'               => 20,
+			'radius'                 => 4,
+			'border_width'           => 1,
+			'bg'                     => '#2271b1',
+			'color'                  => '#ffffff',
+			'hover_bg'               => '#135e96',
+			'hover_color'            => '#ffffff',
+			'border_color'           => '#2271b1',
+			'hover_border_color'     => '#135e96',
+			'position'               => 'replace',
+			'button_align'           => 'left',
+			// Heading.
+			'enable_heading'         => 0,
+			'heading_show_single'    => 1,
+			'heading_show_loops'     => 0,
+			'heading_text'           => __( 'Product Inquiry', 'woocommerce-stock-inquiry' ),
+			'heading_font_family'    => 'inherit',
+			'heading_size'           => 18,
+			'heading_weight'         => 600,
+			'heading_color'          => '#000000',
+			// Description.
+			'enable_desc'            => 0,
+			'desc_show_single'       => 1,
+			'desc_show_loops'        => 0,
+			'desc_text_whatsapp'     => __( 'Click the button below to ask us about this product on WhatsApp.', 'woocommerce-stock-inquiry' ),
+			'desc_text_contact'      => __( 'Click the button below to send us a message about this product.', 'woocommerce-stock-inquiry' ),
+			'desc_font_family'       => 'inherit',
+			'desc_size'              => 14,
+			'desc_color'             => '#666666',
+			// Branding (no color control by design).
+			'branding_show_single'   => 1,
+			'branding_show_loops'    => 0,
+			'branding_font_family'   => 'Poppins',
+			'branding_size'          => 13,
+			'branding_align'         => 'right',
 			// Product rules.
-			'stock_threshold'     => 5,
-			'excluded_products'   => array(),
-			'excluded_categories' => array(),
+			'stock_threshold'        => 5,
+			'excluded_products'      => array(),
+			'excluded_categories'    => array(),
 		);
 	}
 
@@ -141,7 +188,22 @@ class WSI_Settings {
 		$out      = array();
 
 		// Checkboxes: an unchecked box is simply absent from the submission.
-		foreach ( array( 'enabled', 'enable_loops', 'enable_single', 'whatsapp_auto_name', 'whatsapp_auto_url', 'enable_heading', 'enable_desc' ) as $key ) {
+		$checkboxes = array(
+			'enabled',
+			'enable_loops',
+			'enable_single',
+			'whatsapp_auto_name',
+			'whatsapp_auto_url',
+			'enable_heading',
+			'heading_show_single',
+			'heading_show_loops',
+			'enable_desc',
+			'desc_show_single',
+			'desc_show_loops',
+			'branding_show_single',
+			'branding_show_loops',
+		);
+		foreach ( $checkboxes as $key ) {
 			$out[ $key ] = empty( $input[ $key ] ) ? 0 : 1;
 		}
 
@@ -149,11 +211,11 @@ class WSI_Settings {
 		$method        = isset( $input['method'] ) ? sanitize_key( $input['method'] ) : $defaults['method'];
 		$out['method'] = array_key_exists( $method, WSI_Plugin::get_methods() ) ? $method : $defaults['method'];
 
-		// Text.
-		$text_c = isset( $input['button_text_contact'] ) ? sanitize_text_field( $input['button_text_contact'] ) : (isset($input['button_text']) ? sanitize_text_field($input['button_text']) : '');
+		// Button text.
+		$text_c                     = isset( $input['button_text_contact'] ) ? sanitize_text_field( $input['button_text_contact'] ) : ( isset( $input['button_text'] ) ? sanitize_text_field( $input['button_text'] ) : '' );
 		$out['button_text_contact'] = '' !== $text_c ? self::limit( $text_c, 60 ) : $defaults['button_text_contact'];
 
-		$text_w = isset( $input['button_text_whatsapp'] ) ? sanitize_text_field( $input['button_text_whatsapp'] ) : (isset($input['button_text']) ? sanitize_text_field($input['button_text']) : '');
+		$text_w                      = isset( $input['button_text_whatsapp'] ) ? sanitize_text_field( $input['button_text_whatsapp'] ) : ( isset( $input['button_text'] ) ? sanitize_text_field( $input['button_text'] ) : '' );
 		$out['button_text_whatsapp'] = '' !== $text_w ? self::limit( $text_w, 60 ) : $defaults['button_text_whatsapp'];
 
 		// Contact page.
@@ -175,36 +237,43 @@ class WSI_Settings {
 		}
 		$out['whatsapp_number'] = $number;
 
-		$message = isset( $input['whatsapp_message'] ) ? trim( sanitize_textarea_field( $input['whatsapp_message'] ) ) : '';
+		$message                 = isset( $input['whatsapp_message'] ) ? trim( sanitize_textarea_field( $input['whatsapp_message'] ) ) : '';
 		$out['whatsapp_message'] = '' !== $message ? self::limit( $message, 1000 ) : $defaults['whatsapp_message'];
 		$out['whatsapp_target']  = self::choice( $input, 'whatsapp_target', array( '_self', '_blank' ), $defaults );
 
-		// Extra display elements.
-		$htext = isset( $input['heading_text'] ) ? sanitize_text_field( $input['heading_text'] ) : '';
-		$out['heading_text'] = '' !== $htext ? self::limit( $htext, 100 ) : $defaults['heading_text'];
-		
-		$dtext_wa = isset( $input['desc_text_whatsapp'] ) ? sanitize_textarea_field( $input['desc_text_whatsapp'] ) : '';
+		// Heading.
+		$htext                       = isset( $input['heading_text'] ) ? sanitize_text_field( $input['heading_text'] ) : '';
+		$out['heading_text']         = '' !== $htext ? self::limit( $htext, 100 ) : $defaults['heading_text'];
+		$out['heading_size']         = self::int( $input, 'heading_size', 8, 48, $defaults );
+		$out['heading_weight']       = self::weight( $input, 'heading_weight', $defaults );
+		$out['heading_font_family']  = self::font( $input, 'heading_font_family', $defaults );
+
+		// Description.
+		$dtext_wa                  = isset( $input['desc_text_whatsapp'] ) ? sanitize_textarea_field( $input['desc_text_whatsapp'] ) : '';
 		$out['desc_text_whatsapp'] = '' !== $dtext_wa ? self::limit( $dtext_wa, 300 ) : $defaults['desc_text_whatsapp'];
 
-		$dtext_contact = isset( $input['desc_text_contact'] ) ? sanitize_textarea_field( $input['desc_text_contact'] ) : '';
+		$dtext_contact            = isset( $input['desc_text_contact'] ) ? sanitize_textarea_field( $input['desc_text_contact'] ) : '';
 		$out['desc_text_contact'] = '' !== $dtext_contact ? self::limit( $dtext_contact, 300 ) : $defaults['desc_text_contact'];
 
-		$out['heading_size'] = self::int( $input, 'heading_size', 8, 48, $defaults );
-		$out['desc_size']    = self::int( $input, 'desc_size', 8, 48, $defaults );
-		
-		$out['button_align'] = self::choice( $input, 'button_align', array( 'left', 'center', 'right', 'block' ), $defaults );
+		$out['desc_size']        = self::int( $input, 'desc_size', 8, 48, $defaults );
+		$out['desc_font_family'] = self::font( $input, 'desc_font_family', $defaults );
 
-		// Button design.
-		$out['font_size']    = self::int( $input, 'font_size', 8, 48, $defaults );
-		$out['pad_top']      = self::int( $input, 'pad_top', 0, 80, $defaults );
-		$out['pad_right']    = self::int( $input, 'pad_right', 0, 80, $defaults );
-		$out['pad_bottom']   = self::int( $input, 'pad_bottom', 0, 80, $defaults );
-		$out['pad_left']     = self::int( $input, 'pad_left', 0, 80, $defaults );
-		$out['radius']       = self::int( $input, 'radius', 0, 100, $defaults );
-		$out['border_width'] = self::int( $input, 'border_width', 0, 20, $defaults );
+		// Branding.
+		$out['branding_font_family'] = self::font( $input, 'branding_font_family', $defaults );
+		$out['branding_size']        = self::int( $input, 'branding_size', 8, 24, $defaults );
+		$out['branding_align']       = self::choice( $input, 'branding_align', array( 'left', 'center', 'right' ), $defaults );
 
-		$weight             = isset( $input['font_weight'] ) ? (int) $input['font_weight'] : $defaults['font_weight'];
-		$out['font_weight'] = in_array( $weight, array( 400, 500, 600, 700, 800 ), true ) ? $weight : $defaults['font_weight'];
+		// Button.
+		$out['btn_font_family'] = self::font( $input, 'btn_font_family', $defaults );
+		$out['button_align']    = self::choice( $input, 'button_align', array( 'left', 'center', 'right', 'block' ), $defaults );
+		$out['font_size']       = self::int( $input, 'font_size', 8, 48, $defaults );
+		$out['pad_top']         = self::int( $input, 'pad_top', 0, 80, $defaults );
+		$out['pad_right']       = self::int( $input, 'pad_right', 0, 80, $defaults );
+		$out['pad_bottom']      = self::int( $input, 'pad_bottom', 0, 80, $defaults );
+		$out['pad_left']        = self::int( $input, 'pad_left', 0, 80, $defaults );
+		$out['radius']          = self::int( $input, 'radius', 0, 100, $defaults );
+		$out['border_width']    = self::int( $input, 'border_width', 0, 20, $defaults );
+		$out['font_weight']     = self::weight( $input, 'font_weight', $defaults );
 
 		foreach ( array( 'bg', 'color', 'hover_bg', 'hover_color', 'border_color', 'hover_border_color', 'heading_color', 'desc_color' ) as $key ) {
 			$hex         = isset( $input[ $key ] ) ? sanitize_hex_color( $input[ $key ] ) : '';
@@ -253,6 +322,16 @@ class WSI_Settings {
 	private static function choice( $input, $key, $allowed, $defaults ) {
 		$value = isset( $input[ $key ] ) ? sanitize_text_field( $input[ $key ] ) : '';
 		return in_array( $value, $allowed, true ) ? $value : $defaults[ $key ];
+	}
+
+	private static function weight( $input, $key, $defaults ) {
+		$weight = isset( $input[ $key ] ) ? (int) $input[ $key ] : (int) $defaults[ $key ];
+		return in_array( $weight, array( 400, 500, 600, 700, 800 ), true ) ? $weight : (int) $defaults[ $key ];
+	}
+
+	private static function font( $input, $key, $defaults ) {
+		$value = isset( $input[ $key ] ) ? sanitize_text_field( $input[ $key ] ) : '';
+		return array_key_exists( $value, self::font_families() ) ? $value : $defaults[ $key ];
 	}
 
 	private static function ids( $input, $key ) {

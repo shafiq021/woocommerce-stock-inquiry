@@ -1,6 +1,7 @@
 /**
  * WooCommerce Stock Inquiry - settings page behavior.
- * Tabs, method toggle, color pickers, live button preview, WA phone preview.
+ * Tabs, method toggle, dependent sections, color pickers, sticky live preview
+ * (heading > button > description > branding) and the WhatsApp chat-bubble preview.
  */
 ( function ( $ ) {
 	'use strict';
@@ -8,114 +9,160 @@
 	var cfg      = window.wsiAdmin || {};
 	var defaults = cfg.defaults || {};
 	var selector = cfg.selector;
+	var i18n     = cfg.i18n || {};
 	var hexRe    = /^#(?:[0-9a-f]{3}){1,2}$/i;
+	var ctx      = 'single'; // Preview context: 'single' (product page) or 'loops' (listings).
 
-	function field( key ) {
-		return $( '[data-wsi="' + key + '"]' );
+	function $f( key ) {
+		return $( '[name="wsi_settings[' + key + ']"]' );
+	}
+
+	/** Current value of a setting field (checkbox => bool, radio => checked value). */
+	function val( key ) {
+		var $e = $f( key );
+		if ( ! $e.length ) { return defaults[ key ]; }
+		if ( $e.is( ':radio' ) ) {
+			var $c = $e.filter( ':checked' );
+			return $c.length ? $c.val() : defaults[ key ];
+		}
+		if ( $e.is( ':checkbox' ) ) { return $e.is( ':checked' ); }
+		return $e.val();
 	}
 
 	function num( key, min, max ) {
-		var v = parseInt( field( key ).val(), 10 );
+		var v = parseInt( val( key ), 10 );
 		if ( isNaN( v ) ) { v = parseInt( defaults[ key ], 10 ); }
 		return Math.min( max, Math.max( min, v ) );
 	}
 
 	function color( key ) {
-		var v = $.trim( field( key ).val() );
+		var v = $.trim( val( key ) );
 		return hexRe.test( v ) ? v : ( defaults[ key ] || '#000000' );
 	}
 
-	function weight() {
-		var v = parseInt( field( 'font_weight' ).val(), 10 );
-		return $.inArray( v, [ 400, 500, 600, 700, 800 ] ) > -1 ? v : parseInt( defaults.font_weight, 10 );
+	function weight( key ) {
+		var v = parseInt( val( key ), 10 );
+		return $.inArray( v, [ 400, 500, 600, 700, 800 ] ) > -1 ? v : parseInt( defaults[ key ], 10 );
 	}
 
-	function getFontFamily( selectName ) {
-		var v = $( 'select[name="wsi_settings[' + selectName + ']"]' ).val() || 'inherit';
-		return ( v === 'inherit' ) ? 'inherit' : ( "'" + v + "', sans-serif" );
+	/** Mirrors WSI_Settings::font_stack(). */
+	function stack( name ) {
+		if ( ! name || name === 'inherit' ) { return 'inherit'; }
+		if ( $.inArray( name, [ 'serif', 'sans-serif', 'monospace' ] ) > -1 ) { return name; }
+		var fallback = $.inArray( name, [ 'Georgia', 'Playfair Display' ] ) > -1 ? 'serif' : 'sans-serif';
+		return "'" + String( name ).replace( /'/g, '' ) + "', " + fallback;
 	}
 
+	function align( key, allowed ) {
+		var v = val( key );
+		return $.inArray( v, allowed ) > -1 ? v : defaults[ key ];
+	}
+
+	/** Mirrors WSI_Button::build_css(). */
 	function buildCss() {
 		var s = selector;
-		var align = $( 'select[name="wsi_settings[button_align]"]' ).val() || 'left';
-		var containerCss;
-		if ( align === 'block' ) {
-			containerCss = '#wsi-preview-container{display:block;width:100%;} ' + s + '{display:block;width:100%;}';
+		var c = '.wsi-inquiry-container';
+		var a = align( 'button_align', [ 'left', 'center', 'right', 'block' ] );
+		var css;
+
+		if ( a === 'block' ) {
+			css = c + '{display:block;width:100%;margin:15px 0;}' + s + '{display:block;width:100%;}';
 		} else {
-			containerCss = '#wsi-preview-container{text-align:' + align + ';} ' + s + '{display:inline-block;}';
+			css = c + '{text-align:' + a + ';margin:15px 0;}' + s + '{display:inline-block;}';
 		}
 
-		var hSize  = parseInt( $( 'input[name="wsi_settings[heading_size]"]' ).val() || 18, 10 );
-		var hColor = $( 'input[name="wsi_settings[heading_color]"]' ).val() || '#000000';
-		var hFont  = getFontFamily( 'heading_font_family' );
-		var headingCss = '#wsi-preview-heading{font-size:' + hSize + 'px;color:' + hColor + ';font-family:' + hFont + ';margin-bottom:10px;font-weight:600;}';
-
-		var dSize  = parseInt( $( 'input[name="wsi_settings[desc_size]"]' ).val() || 14, 10 );
-		var dColor = $( 'input[name="wsi_settings[desc_color]"]' ).val() || '#666666';
-		var dFont  = getFontFamily( 'desc_font_family' );
-		var descCss = '#wsi-preview-desc{font-size:' + dSize + 'px;color:' + dColor + ';font-family:' + dFont + ';margin-top:10px;}';
-
-		var btnFont = getFontFamily( 'btn_font_family' );
-
-		return s + '{box-sizing:border-box;min-height:0;font-size:' + num( 'font_size', 8, 48 ) +
-			'px;font-weight:' + weight() + ';font-family:' + btnFont +
+		css += s + '{box-sizing:border-box;min-height:0;font-family:' + stack( val( 'btn_font_family' ) ) +
+			';font-size:' + num( 'font_size', 8, 48 ) + 'px;font-weight:' + weight( 'font_weight' ) +
 			';line-height:1.4;text-align:center;text-decoration:none;text-shadow:none;box-shadow:none;cursor:pointer;padding:' +
 			num( 'pad_top', 0, 80 ) + 'px ' + num( 'pad_right', 0, 80 ) + 'px ' + num( 'pad_bottom', 0, 80 ) + 'px ' + num( 'pad_left', 0, 80 ) +
-			'px;border-radius:' + num( 'radius', 0, 100 ) +
-			'px;border-style:solid;border-width:' + num( 'border_width', 0, 20 ) +
-			'px;border-color:' + color( 'border_color' ) +
-			';background-color:' + color( 'bg' ) +
-			';color:' + color( 'color' ) +
+			'px;border-radius:' + num( 'radius', 0, 100 ) + 'px;border-style:solid;border-width:' + num( 'border_width', 0, 20 ) +
+			'px;border-color:' + color( 'border_color' ) + ';background-color:' + color( 'bg' ) + ';color:' + color( 'color' ) +
 			';transition:background-color .15s ease,color .15s ease,border-color .15s ease}' +
-			s + ':hover,' + s + ':focus{background-color:' + color( 'hover_bg' ) +
-			';color:' + color( 'hover_color' ) +
-			';border-color:' + color( 'hover_border_color' ) +
-			';text-decoration:none}' + containerCss + headingCss + descCss;
+			s + ':hover,' + s + ':focus{background-color:' + color( 'hover_bg' ) + ';color:' + color( 'hover_color' ) +
+			';border-color:' + color( 'hover_border_color' ) + ';text-decoration:none}';
+
+		css += c + ' .wsi-inquiry-heading{margin:0 0 10px;line-height:1.3;font-family:' + stack( val( 'heading_font_family' ) ) +
+			';font-size:' + num( 'heading_size', 8, 48 ) + 'px;font-weight:' + weight( 'heading_weight' ) + ';color:' + color( 'heading_color' ) + '}';
+
+		css += c + ' .wsi-inquiry-desc{margin:10px 0 0;line-height:1.5;font-family:' + stack( val( 'desc_font_family' ) ) +
+			';font-size:' + num( 'desc_size', 8, 48 ) + 'px;color:' + color( 'desc_color' ) + '}' +
+			c + ' .wsi-inquiry-desc p{margin:0 0 10px;color:inherit;font-size:inherit;font-family:inherit}' +
+			c + ' .wsi-inquiry-desc p:last-child{margin-bottom:0}';
+
+		css += c + ' .wsi-branding-sk{display:block;margin:10px 0 0;opacity:.7;color:#999;line-height:1.5;font-family:' + stack( val( 'branding_font_family' ) ) +
+			';font-size:' + num( 'branding_size', 8, 24 ) + 'px;text-align:' + align( 'branding_align', [ 'left', 'center', 'right' ] ) + '}';
+
+		return css;
 	}
 
-	function updateWaPreview() {
-		var waMessage = $.trim( $( '#wsi-whatsapp-message' ).val() ) || '';
-		if ( $( 'input[name="wsi_settings[whatsapp_auto_name]"]' ).is( ':checked' ) && waMessage.indexOf( '{product_name}' ) === -1 ) {
-			waMessage += '\n\nProduct: Example Product';
+	function escapeHtml( t ) {
+		return $( '<div>' ).text( t ).html();
+	}
+
+	/** Same shape as wpautop(): blank line = paragraph, single newline = <br>. */
+	function paragraphs( t ) {
+		return $.map( String( t ).replace( /\r\n?/g, '\n' ).split( /\n{2,}/ ), function ( p ) {
+			p = $.trim( p );
+			return p ? '<p>' + escapeHtml( p ).replace( /\n/g, '<br>' ) + '</p>' : null;
+		} ).join( '' );
+	}
+
+	/** Mirrors WSI_WhatsApp::build_message() with example product data. */
+	function waMessage() {
+		var name = 'Example Product';
+		var url  = 'https://example.com/product/example';
+		var t    = String( $f( 'whatsapp_message' ).val() || '' ).replace( /\r\n?/g, '\n' );
+		if ( ! $.trim( t ) ) { t = String( defaults.whatsapp_message || '' ); }
+
+		var hasName = t.indexOf( '{product_name}' ) > -1;
+		var hasUrl  = t.indexOf( '{product_url}' ) > -1;
+		var m       = t.split( '{product_name}' ).join( name ).split( '{product_url}' ).join( url );
+		var extra   = [];
+
+		if ( val( 'whatsapp_auto_name' ) && ! hasName ) {
+			extra.push( ( i18n.productLabel || 'Product: %s' ).replace( '%s', name ) );
 		}
-		if ( $( 'input[name="wsi_settings[whatsapp_auto_url]"]' ).is( ':checked' ) && waMessage.indexOf( '{product_url}' ) === -1 ) {
-			waMessage += '\n\nProduct URL: https://example.com/product/example';
+		if ( val( 'whatsapp_auto_url' ) && ! hasUrl ) {
+			extra.push( ( i18n.urlLabel || 'Product URL: %s' ).replace( '%s', url ) );
 		}
-		waMessage = waMessage
-			.replace( /{product_name}/g, 'Example Product' )
-			.replace( /{product_url}/g, 'https://example.com/product/example' );
-		$( '#wsi-wa-bubble-text' ).text( waMessage );
+		if ( extra.length ) {
+			m = m.replace( /\s+$/, '' ) + '\n\n' + extra.join( '\n' );
+		}
+		return $.trim( m );
 	}
 
 	function updatePreview() {
-		var method = $( 'input[name="wsi_settings[method]"]:checked' ).val();
+		var isWa = val( 'method' ) === 'whatsapp';
+		var sfx  = ctx;
 
-		var text = ( method === 'whatsapp' )
-			? ( $.trim( $( '#wsi-button-text-whatsapp' ).val() ) || defaults.button_text_whatsapp || 'Send WhatsApp' )
-			: ( $.trim( $( '#wsi-button-text-contact' ).val() ) || defaults.button_text_contact || 'Send Inquiry' );
+		// Button.
+		var text = isWa
+			? ( $.trim( val( 'button_text_whatsapp' ) ) || defaults.button_text_whatsapp || 'Send WhatsApp' )
+			: ( $.trim( val( 'button_text_contact' ) ) || defaults.button_text_contact || 'Send Inquiry' );
 		$( '#wsi-preview-button' ).text( text );
 
-		var showHeading = $( 'input[name="wsi_settings[enable_heading]"]' ).is( ':checked' );
-		var headingText = $( 'input[name="wsi_settings[heading_text]"]' ).val();
-		var $h = $( '#wsi-preview-heading' );
-		if ( showHeading && headingText ) {
-			$h.text( headingText ).show();
-		} else {
-			$h.hide();
-		}
+		// Heading.
+		var hText = $.trim( val( 'heading_text' ) );
+		$( '#wsi-preview-heading' ).text( hText ).toggle( !! ( val( 'enable_heading' ) && val( 'heading_show_' + sfx ) && hText ) );
 
-		var showDesc = $( 'input[name="wsi_settings[enable_desc]"]' ).is( ':checked' );
-		var descKey  = ( method === 'whatsapp' ) ? 'desc_text_whatsapp' : 'desc_text_contact';
-		var descText = $( 'textarea[name="wsi_settings[' + descKey + ']"]' ).val();
-		var $d = $( '#wsi-preview-desc' );
-		if ( showDesc && descText ) {
-			$d.html( descText.replace( /\n/g, '<br>' ) ).show();
-		} else {
-			$d.hide();
-		}
+		// Description.
+		var dText = $.trim( val( isWa ? 'desc_text_whatsapp' : 'desc_text_contact' ) );
+		$( '#wsi-preview-desc' ).html( paragraphs( dText ) ).toggle( !! ( val( 'enable_desc' ) && val( 'desc_show_' + sfx ) && dText ) );
 
-		updateWaPreview();
+		// Branding.
+		$( '#wsi-preview-branding' ).toggle( !! val( 'branding_show_' + sfx ) );
+
+		// WhatsApp bubble.
+		$( '#wsi-wa-bubble-text' ).text( waMessage() );
+
 		$( '#wsi-preview-style' ).text( buildCss() );
+	}
+
+	/** Show a section's controls only while its master toggle is on. */
+	function updateDepends() {
+		$( '[data-depends]' ).each( function () {
+			$( this ).toggle( !! val( $( this ).data( 'depends' ) ) );
+		} );
 	}
 
 	function showTab( id ) {
@@ -129,7 +176,7 @@
 	}
 
 	function showMethodFields() {
-		var method = $( 'input[name="wsi_settings[method]"]:checked' ).val();
+		var method = val( 'method' );
 		$( '.wsi-method-fields' ).hide().filter( '[data-method="' + method + '"]' ).show();
 	}
 
@@ -152,6 +199,14 @@
 		} );
 		showMethodFields();
 
+		// Preview context switch (product page vs listings).
+		$( '.wsi-preview-ctx button' ).on( 'click', function () {
+			ctx = $( this ).data( 'ctx' ) === 'loops' ? 'loops' : 'single';
+			$( '.wsi-preview-ctx button' ).removeClass( 'is-active' ).attr( 'aria-pressed', 'false' );
+			$( this ).addClass( 'is-active' ).attr( 'aria-pressed', 'true' );
+			updatePreview();
+		} );
+
 		// Color pickers.
 		$( '.wsi-color' ).wpColorPicker( {
 			change: function ( event, ui ) {
@@ -161,43 +216,18 @@
 			clear: function () { setTimeout( updatePreview, 0 ); }
 		} );
 
-		// Delegate all field changes to updatePreview.
-		$( '#wsi-settings-form' ).on( 'input change keyup', 'input, textarea, select', updatePreview );
+		// Any field change refreshes the preview and dependent sections.
+		$( '#wsi-settings-form' ).on( 'input change keyup', 'input, textarea, select', function () {
+			updateDepends();
+			updatePreview();
+		} );
 		$( '#wsi-preview-button' ).on( 'click', function ( e ) { e.preventDefault(); } );
+
+		updateDepends();
 		updatePreview();
 
-		// Branding: inject runtime & guard.
-		var addBrandingPreview = function () {
-			var container = document.getElementById( 'wsi-preview-container' );
-			if ( ! container ) { return null; }
-			var old = container.querySelector( '.wsi-branding-sk' );
-			if ( old ) { old.remove(); }
-			var b = document.createElement( 'div' );
-			b.className = 'wsi-branding-sk';
-			b.innerHTML = 'Powered By SK';
-			b.style.cssText = 'display:block !important;visibility:visible !important;opacity:0.7 !important;' +
-				"font-family:'Poppins',sans-serif !important;font-size:0.8125em !important;" +
-				'color:#999 !important;margin-top:10px !important;line-height:1.5 !important;' +
-				'text-align:right !important;width:100% !important;position:static !important;';
-			container.appendChild( b );
-			return b;
-		};
-		var previewBranding = addBrandingPreview();
-		setInterval( function () {
-			if ( ! previewBranding || ! document.body.contains( previewBranding ) ) {
-				previewBranding = addBrandingPreview();
-			} else {
-				var st = window.getComputedStyle( previewBranding );
-				if ( st.display === 'none' || st.visibility === 'hidden' || parseFloat( st.opacity ) < 0.1 ) {
-					previewBranding.style.setProperty( 'display', 'block', 'important' );
-					previewBranding.style.setProperty( 'visibility', 'visible', 'important' );
-					previewBranding.style.setProperty( 'opacity', '0.7', 'important' );
-				}
-			}
-		}, 2000 );
-
 		$( '.wsi-reset' ).on( 'click', function ( e ) {
-			if ( ! window.confirm( ( cfg.i18n && cfg.i18n.confirmReset ) || 'Reset?' ) ) {
+			if ( ! window.confirm( i18n.confirmReset || 'Reset?' ) ) {
 				e.preventDefault();
 			}
 		} );
