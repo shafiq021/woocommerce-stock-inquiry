@@ -11,6 +11,12 @@ A lightweight, free, open-source WooCommerce plugin that replaces **Add to Cart*
 
 When a product is restocked, Add to Cart returns automatically (the decision is computed from the live product on every render).
 
+### Main Overview
+
+The plugin replaces the Add to Cart button with a Send Inquiry button once a product's stock drops to the configured threshold — while keeping every product visible and all stock data untouched.
+
+![WooCommerce Stock Inquiry — Main Overview](screenshots/Stock-Inquiry.png)
+
 ## Features
 
 - Stock-threshold based inquiry button (backorders and unmanaged stock respected)
@@ -40,6 +46,32 @@ Heading, Description and Branding each have **Single product page** and **Produc
 ### Live preview
 
 The right-hand column is sticky on every tab and uses the same markup classes and CSS as the front end: heading → button → description → branding. Use the *Product page / Listings* switch to see what each location shows.
+
+![Live Preview of the Inquiry Button](screenshots/live-preview.png)
+
+### Heading Options
+
+Control the heading shown above the inquiry button — toggle it on or off, set the text, choose where it appears (single product page, product listings, or both), and fine-tune the font family, size, weight, and color.
+
+![Heading Options](screenshots/heading-options.png)
+
+### Contact Options
+
+Configure how customers reach you when they submit an inquiry. Choose between the **Contact Page** method (which passes the product via query string) and **WhatsApp** (with a pre-filled message), set the button text, WhatsApp number, and message template.
+
+![Contact Options](screenshots/contact-options.png)
+
+### Message Template
+
+Customize the message that is pre-filled when a customer sends an inquiry via WhatsApp. Use dynamic placeholders like `{product_name}` and `{product_url}` to personalize each message automatically.
+
+![Message Template](screenshots/message-template.png)
+
+### Exclude Products
+
+Prevent the Send Inquiry button from appearing on specific products or entire categories. Excluded items will always keep the standard Add to Cart button, even when their stock drops below the threshold.
+
+![Exclude Products](screenshots/exclude-products.png)
 
 ## Installation
 
