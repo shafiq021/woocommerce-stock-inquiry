@@ -1,0 +1,52 @@
+/* WooCommerce Stock Inquiry - Inquiries screens (loaded only on WooCommerce > Inquiries). */
+.wsi-inquiries .wsi-nav { margin-bottom: 16px; }
+
+.wsi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0 0 20px; }
+.wsi-card { display: block; padding: 14px 16px; background: #fff; border: 1px solid #c3c4c7; border-left-width: 4px; border-radius: 3px; text-decoration: none; color: #1d2327; }
+.wsi-card:hover, .wsi-card:focus { border-color: #2271b1; color: #1d2327; box-shadow: 0 0 0 1px #2271b1; }
+.wsi-card__number { display: block; font-size: 28px; line-height: 1.2; font-weight: 600; }
+.wsi-card__label { display: block; color: #50575e; }
+.wsi-card--total { border-left-color: #2271b1; }
+.wsi-card--new { border-left-color: #d63638; }
+.wsi-card--contacted { border-left-color: #dba617; }
+.wsi-card--in_progress { border-left-color: #8c5cd1; }
+.wsi-card--completed { border-left-color: #00a32a; }
+.wsi-card--closed { border-left-color: #787c82; }
+
+.wsi-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.wsi-panel { background: #fff; border: 1px solid #c3c4c7; border-radius: 3px; padding: 4px 16px 16px; }
+.wsi-panel h2, .wsi-panel h3 { margin: 16px 0 8px; }
+.wsi-num { text-align: right; width: 1%; white-space: nowrap; }
+.wsi-empty { background: #fff; border: 1px solid #c3c4c7; padding: 8px 20px 12px; max-width: 640px; }
+
+.wsi-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; line-height: 1.6; background: #f0f0f1; color: #1d2327; white-space: nowrap; }
+.wsi-status--new { background: #fcf0f1; color: #8a2424; }
+.wsi-status--contacted { background: #fcf9e8; color: #6e5400; }
+.wsi-status--in_progress { background: #f1ebfb; color: #4b2a88; }
+.wsi-status--completed { background: #edfaef; color: #00541a; }
+.wsi-status--closed { background: #f0f0f1; color: #50575e; }
+
+.wsi-single-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wsi-product { display: flex; gap: 12px; align-items: center; }
+.wsi-product__image img { display: block; width: 80px; height: 80px; object-fit: cover; border: 1px solid #dcdcde; border-radius: 3px; }
+.wsi-details th { width: 120px; text-align: left; }
+.wsi-message { padding: 12px; background: #f6f7f7; border: 1px solid #dcdcde; border-radius: 3px; overflow-wrap: anywhere; }
+
+.wsi-status-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.wsi-notes { margin: 8px 0 12px; padding: 0; list-style: none; }
+.wsi-note { margin: 0 0 8px; padding: 8px 10px; background: #f6f7f7; border-left: 3px solid #2271b1; overflow-wrap: anywhere; }
+.wsi-note--status_change { border-left-color: #a7aaad; color: #50575e; }
+.wsi-note__meta { margin-top: 4px; color: #646970; font-size: 12px; }
+.wsi-note-form textarea { margin-bottom: 6px; }
+.wsi-danger { margin-top: 20px; padding-top: 12px; border-top: 1px solid #dcdcde; }
+
+.wsi-bars td { vertical-align: middle; }
+.wsi-bar-label { width: 38%; overflow-wrap: anywhere; }
+.wsi-bar-cell { width: 50%; }
+.wsi-bar { display: block; height: 12px; min-width: 2px; background: #2271b1; border-radius: 2px; }
+
+.wsi-filters input[type="date"] { vertical-align: middle; }
+
+@media (max-width: 960px) {
+	.wsi-columns { grid-template-columns: minmax(0, 1fr); }
+}

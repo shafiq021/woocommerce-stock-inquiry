@@ -1,0 +1,119 @@
+/* WooCommerce Stock Inquiry - inquiry form modal. */
+html.wsi-modal-open { overflow: hidden; }
+
+.wsi-modal[hidden] { display: none; }
+.wsi-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+}
+.wsi-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, .55);
+}
+.wsi-modal__dialog {
+	position: relative;
+	width: 100%;
+	max-width: 480px;
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+	padding: 24px;
+	background: #fff;
+	color: #1d2327;
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+	box-sizing: border-box;
+	font-size: 15px;
+	line-height: 1.5;
+}
+.wsi-modal__dialog:focus { outline: none; }
+.wsi-modal__close {
+	position: absolute;
+	top: 8px;
+	right: 10px;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #50575e;
+	font-size: 26px;
+	line-height: 1;
+	cursor: pointer;
+}
+.wsi-modal__close:hover,
+.wsi-modal__close:focus { color: #000; }
+.wsi-modal__title { margin: 0 32px 6px 0; font-size: 20px; line-height: 1.3; }
+.wsi-modal__product { margin: 0 0 14px; color: #50575e; font-size: 14px; }
+
+.wsi-form .wsi-field { margin: 0 0 14px; }
+.wsi-form label { display: block; margin: 0 0 4px; font-weight: 600; font-size: 14px; }
+.wsi-form .wsi-optional { font-weight: 400; color: #646970; }
+.wsi-form input[type="text"],
+.wsi-form input[type="email"],
+.wsi-form input[type="tel"],
+.wsi-form textarea {
+	display: block;
+	width: 100%;
+	padding: 9px 11px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	color: #1d2327;
+	font: inherit;
+	box-sizing: border-box;
+}
+.wsi-form input:focus,
+.wsi-form textarea:focus { outline: 2px solid #2271b1; outline-offset: 1px; border-color: #2271b1; }
+.wsi-form [aria-invalid="true"] { border-color: #d63638; }
+.wsi-field__error { display: block; min-height: 0; margin-top: 3px; color: #d63638; font-size: 13px; }
+.wsi-form__status { min-height: 20px; margin: 0 0 10px; color: #d63638; font-size: 14px; }
+
+/* Honeypot: off screen, not display:none, so simple bots still fill it. */
+.wsi-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.wsi-form__submit {
+	display: block;
+	width: 100%;
+	padding: 12px 20px;
+	border: 1px solid #2271b1;
+	border-radius: 4px;
+	background: #2271b1;
+	color: #fff;
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+.wsi-form__submit[disabled] { opacity: .65; cursor: wait; }
+
+.wsi-success { text-align: center; padding: 12px 0 4px; }
+.wsi-success[hidden], .wsi-success__whatsapp[hidden], .wsi-modal__product[hidden], .wsi-form[hidden] { display: none; }
+.wsi-success__message { margin: 0 0 16px; font-size: 16px; }
+.wsi-success__whatsapp {
+	display: inline-block;
+	margin: 0 8px 8px 0;
+	padding: 10px 18px;
+	border-radius: 4px;
+	background: #25d366;
+	color: #fff;
+	font-weight: 600;
+	text-decoration: none;
+}
+.wsi-success__close {
+	padding: 10px 18px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	color: #1d2327;
+	font: inherit;
+	cursor: pointer;
+}
+@media (max-width: 480px) {
+	.wsi-modal__dialog { padding: 18px; }
+}

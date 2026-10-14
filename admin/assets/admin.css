@@ -1,0 +1,289 @@
+/* ===========================
+   CUSTOM TOGGLE CHECKBOXES
+=========================== */
+.wsi-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 1rem;
+	user-select: none;
+	vertical-align: middle;
+	margin-bottom: 6px;
+}
+.wsi-toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.wsi-checkmark {
+	--clr: #008743;
+	position: relative;
+	display: inline-block;
+	height: 1.3em;
+	width: 1.3em;
+	background-color: #ccc;
+	border-radius: 50%;
+	transition: background-color 300ms, border-radius 300ms;
+	flex-shrink: 0;
+}
+.wsi-toggle input:checked ~ .wsi-checkmark {
+	background-color: var(--clr);
+	border-radius: .4em;
+	animation: wsiPulse 500ms ease-in-out;
+}
+.wsi-toggle input:focus-visible ~ .wsi-checkmark {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+.wsi-checkmark::after {
+	content: "";
+	position: absolute;
+	display: none;
+	left: 0.45em;
+	top: 0.25em;
+	width: 0.25em;
+	height: 0.5em;
+	border: solid #fff;
+	border-width: 0 0.15em 0.15em 0;
+	transform: rotate(45deg);
+}
+.wsi-toggle input:checked ~ .wsi-checkmark::after {
+	display: block;
+}
+@keyframes wsiPulse {
+	0%   { box-shadow: 0 0 0 #0B6E4F90; rotate: 20deg; }
+	50%  { rotate: -20deg; }
+	75%  { box-shadow: 0 0 0 10px #0B6E4F60; }
+	100% { box-shadow: 0 0 0 13px #0B6E4F30; rotate: 0; }
+}
+
+/* ===========================
+   GENERAL ADMIN
+=========================== */
+.wsi-wrap .wsi-note { margin: 12px 0; }
+.wsi-wrap .wsi-radio { display: inline-block; margin: 0 20px 6px 0; }
+.wsi-wrap .wsi-disabled { opacity: .6; }
+.wsi-wrap .wsi-badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border-radius: 10px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+.wsi-wrap .wsi-method-fields h2 { margin-top: 24px; }
+.wsi-wrap .wsi-padding label { display: inline-block; margin-right: 12px; }
+.wsi-wrap .wsi-padding label span { display: block; font-size: 12px; color: #646970; }
+.wsi-wrap .wsi-section-title { margin: 0 0 4px; font-size: 16px; }
+.wsi-wrap .wsi-section-intro { margin: 0 0 8px; color: #646970; }
+
+/* ===========================
+   MAIN FLEX LAYOUT
+   Controls left, sticky preview right.
+=========================== */
+.wsi-main-layout {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0;
+	align-items: flex-start;
+	margin-top: 16px;
+}
+.wsi-settings-column {
+	flex: 1 1 0;
+	min-width: 0;
+	border-right: 1px solid #c3c4c7;
+	padding-right: 24px;
+}
+.wsi-settings-column .nav-tab-wrapper {
+	margin-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
+}
+.wsi-tab-contents {
+	padding-top: 20px;
+}
+.wsi-preview-column {
+	flex: 0 0 340px;
+	max-width: 340px;
+	padding-left: 24px;
+	position: sticky;
+	top: 42px; /* Below the admin bar. */
+	align-self: flex-start;
+}
+@media (max-width: 782px) {
+	.wsi-preview-column { top: 56px; }
+}
+/* Narrow screens: preview stacks above the controls so it is never lost at the bottom. */
+@media (max-width: 1100px) {
+	.wsi-main-layout { flex-wrap: wrap; }
+	.wsi-settings-column { border-right: none; padding-right: 0; flex: 1 1 100%; order: 2; }
+	.wsi-preview-column {
+		flex: 1 1 100%;
+		max-width: none;
+		padding-left: 0;
+		position: static;
+		order: 1;
+		margin-bottom: 20px;
+	}
+}
+
+/* ===========================
+   LIVE PREVIEW CARD
+=========================== */
+.wsi-preview-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 16px;
+	margin-bottom: 12px;
+}
+.wsi-preview-card > strong {
+	display: block;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: .5px;
+	color: #646970;
+	margin-bottom: 10px;
+}
+.wsi-preview-ctx {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+.wsi-preview-ctx .button.is-active {
+	background: #2271b1;
+	border-color: #2271b1;
+	color: #fff;
+}
+.wsi-preview-stage {
+	min-height: 80px;
+	margin: 0 0 8px;
+	background: #fff;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	padding: 4px 15px;
+	width: 100%;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+/* ===========================
+   WHATSAPP CHAT BUBBLES
+   Gray incoming + green outgoing bubble with tails.
+   The tail "cut-out" uses the demo background, so keep both white.
+=========================== */
+.wsi-bubble-demo {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	max-width: 420px;
+	padding: 18px 22px 18px 18px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	box-sizing: border-box;
+}
+.wsi-bubble {
+	position: relative;
+	max-width: 82%;
+	padding: 10px 16px;
+	border-radius: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	box-sizing: border-box;
+}
+.wsi-bubble::before,
+.wsi-bubble::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	height: 20px;
+}
+.wsi-bubble--in {
+	align-self: flex-start;
+	background: #e5e7ea;
+	color: #1c1c1e;
+}
+.wsi-bubble--in::before {
+	left: -8px;
+	width: 20px;
+	background: #e5e7ea;
+	border-bottom-right-radius: 15px;
+}
+.wsi-bubble--in::after {
+	left: -10px;
+	width: 10px;
+	background: #fff;
+	border-bottom-right-radius: 10px;
+}
+.wsi-bubble--out {
+	align-self: flex-end;
+	background: #00cf48;
+	color: #fff;
+}
+.wsi-bubble--out::before {
+	right: -8px;
+	width: 20px;
+	background: #00cf48;
+	border-bottom-left-radius: 15px;
+}
+.wsi-bubble--out::after {
+	right: -10px;
+	width: 10px;
+	background: #fff;
+	border-bottom-left-radius: 10px;
+}
+
+/* ===========================
+   V2 additions
+=========================== */
+.wsi-wrap .wsi-block { display: block; margin: 0 0 10px; }
+.wsi-wrap .wsi-block .description { margin: 0; }
+.wsi-wrap .wsi-tab-issue {
+	display: inline-block;
+	min-width: 16px;
+	height: 16px;
+	line-height: 16px;
+	margin-left: 4px;
+	border-radius: 50%;
+	background: #d63638;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	text-align: center;
+}
+.wsi-wrap .wsi-test-result { margin-left: 8px; color: #50575e; }
+.wsi-wrap .wsi-placeholder-table { max-width: 720px; margin-bottom: 16px; }
+.wsi-wrap .wsi-placeholder-table td:first-child { width: 190px; }
+.wsi-wrap .wsi-status-table { max-width: 560px; margin-bottom: 16px; }
+.wsi-wrap .wsi-tab h3 { margin: 24px 0 4px; }
+.wsi-mail-demo {
+	max-width: 480px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+.wsi-mail-subject { padding: 8px 12px; border-bottom: 1px solid #dcdcde; font-weight: 600; }
+.wsi-mail-body { padding: 12px; white-space: pre-wrap; word-break: break-word; }
+.wsi-preview-state-note { margin: 8px 0 0; color: #50575e; font-size: 12px; min-height: 18px; }
+.wsi-fake-cart { display: flex; gap: 8px; align-items: stretch; margin: 15px 0; }
+.wsi-fake-qty {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 40px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+.wsi-fake-atc.wsi-fake-atc { background: #50575e; border-color: #50575e; color: #fff; cursor: default; }
+.wsi-preview-product { margin: 12px 0 0; }
+.wsi-preview-product label { display: block; margin-bottom: 4px; font-size: 12px; color: #50575e; }
